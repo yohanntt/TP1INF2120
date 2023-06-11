@@ -1,15 +1,18 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 public class Simulation {
     public static final String  ERREUR_FICHIER = "Erreur dans la lecture du fichier";
     public static final String FICHIER_INTROUVABLE = "Le fichier n'a pas été trouvé";
+    public static final String ERREUR_FORMAT_FICHIER = "Erreur dans le format du fichier";
     public static void main(String[] args) {
         ConstructionSimulation("univers.txt");
     }
 
     public static void ConstructionSimulation(String cheminFichier){
         ArrayList<String> listeContenuFichier = null;
+
         try {
              listeContenuFichier = lectureFichier(cheminFichier);
         }catch (FileNotFoundException fichierNonTrouver){
@@ -21,8 +24,9 @@ public class Simulation {
             System.exit(-1);
         }
 
-        System.out.println(listeContenuFichier);
-        double graviteAcceleration = Double.parseDouble(listeContenuFichier.get(0));
+        validationDesCanon(listeContenuFichier);
+
+
 
 
 
@@ -53,18 +57,34 @@ public class Simulation {
     }
 
 
-    /* try {
-            BufferedReader lecteur = new BufferedReader(new InputStreamReader(new FileInputStream(cheminFichier)
-                    , "UTF-8"));
-            String ligneDuFichier;
-            while ((ligneDuFichier = lecteur.readLine()) != null){
-                contenuDuFichier.add(ligneDuFichier);
-            }
-            lecteur.close();
-        }catch (FileNotFoundException erreurLecture){
-            System.err.println("Erreur dans la lecture du fichier");
-        }catch (IOException erreurInputOutput){
-            System.err.println("Erreur d'input ou d'output");
-        } */
+    
+    public static ArrayList<String[]>  validationDesCanon(ArrayList<String> listeContenuFichier){
+        boolean canonValide = true;
+        ArrayList<String[]> valeursChaqueCanon = new ArrayList<>();
+        String[] valeursCanon  = new String[6];
+
+        //index ou les valeurs des canons commence.
+        int i = 3;
+
+        while (i < listeContenuFichier.size() && canonValide){
+          //Separe chaque valeurs des canons et les mets dans un tableau
+          valeursCanon = listeContenuFichier.get(i).split("\\s+");
+          if(valeursCanon.length % 6 != 0){
+              canonValide = false;
+              System.err.println(ERREUR_FORMAT_FICHIER);
+              System.exit(-1);
+          }else {
+              valeursChaqueCanon.add(valeursCanon);
+          }
+
+          i++;
+        }
+
+        return valeursChaqueCanon;
+    }
+
+
+
+
 
 }

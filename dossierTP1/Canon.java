@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Canon extends Vecteur {
+public class Canon  {
 
     private double pointX;
     private double pointY;
@@ -15,19 +15,20 @@ public class Canon extends Vecteur {
 
     }
     public Canon(double pointX, double pointY, double vitesseX,
-                 double vitesseY, int tempsDeChargement,int tempsChargeInitial, int vieProjectile){
-        super(pointX,pointY);
+                 double vitesseY, int tempsDeChargement, int vieProjectile){
+        this.pointX = pointX;
+        this.pointY = pointY;
         this.vitesseX = vitesseX;
         this.vitesseY = vitesseY;
         this.tempsDeChargement = tempsDeChargement;
-        this.tempsChargeInitial = tempsChargeInitial;
         this.vieProjectile = vieProjectile;
 
     }
 
 
     public Canon(double pointX, double pointY,double vitesseX,double vitesseY, int vieProjectile){
-       super(pointX,pointY);
+       this.pointX = pointX;
+       this.pointY = pointY;
        this.vitesseX = vitesseX;
        this.vitesseY = vitesseY;
        this.vieProjectile = vieProjectile;
@@ -79,10 +80,10 @@ public class Canon extends Vecteur {
         return vieProjectile;
     }
 
-    public static Projectile manipulationCanon(Canon unCanon){
+    public static Projectile manipulationCanon(Canon unCanon, int compteurChargement){
         //c'est là que je vais gérer les conditions des canons
         //comme verifier le temps de chargement, lancer de nouveau projectile etc...
-        int compteur = 0;
+        int compteur = 1;
         Projectile nouvProjectile = null;
         double pointX = unCanon.getPointX();
         double pointY = unCanon.getPointY();
@@ -93,9 +94,7 @@ public class Canon extends Vecteur {
 
         //changer la condition pour un ticUnivers % tempsCharge == 0
         //créer classe UNIVERS avant
-        if (compteur == unCanon.getTempsDeChargement()){
-            compteur = 0;
-            unCanon.setTempsDeChargement(unCanon.tempsChargeInitial);
+        if (compteurChargement % unCanon.getTempsDeChargement() == 0){
             //creation d'un nouveau projectile
             nouvProjectile = new Projectile();
             nouvProjectile.setPointX(pointX);
@@ -103,10 +102,12 @@ public class Canon extends Vecteur {
             nouvProjectile.setVitesseX(vitesseX);
             nouvProjectile.setVitesseY(vitesseY);
             nouvProjectile.setVieProjectile(vieProjectile);
-
-        }else{
-            compteur++;
         }
+
+
+
+
+
 
         //unCanon.tempsDeChargement = unCanon.tempsDeChargement - 1;
         return nouvProjectile;

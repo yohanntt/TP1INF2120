@@ -17,9 +17,11 @@ public class Simulation {
         ArrayList<String> listeContenuFichier = null;
         ArrayList<Double> valeursUnivers = new ArrayList<>();
         ArrayList<Projectile> listeProjectileOfficiel = new ArrayList<>();
+        ArrayList<Vecteur> rapportpourUnTic = null;
         double gravite;
         int nombreTicASimuler;
         double durerUnTic;
+        int compteurChargement = 0;
 
 
         try {
@@ -49,17 +51,30 @@ public class Simulation {
        ArrayList<String[]> canonValider = validationDesCanon(listeContenuFichier);
         //creation de tous les canons du fichier d'entrer converti en double/int
        ArrayList<Canon> valeurCanonConverti = constructionCanon(canonValider);
+          while (compteurChargement <= univers.getNombreDeTicSimuler()){
+              //va parcourir les canons pour verifier s'ils peuvent lancer de nouveau projectile
+              ArrayList<Projectile> projectilesAAjouter = traverserObjetCanon(valeurCanonConverti, compteurChargement);
+              lesProjectilesMisAJour = ajoutDesProjectiles(projectilesAAjouter,lesProjectilesMisAJour);
+              lesProjectilesMisAJour = bougerLesProjectiles(lesProjectilesMisAJour, univers);
+              lesProjectilesMisAJour = modificationDeLaVitesseDesProjectiles(lesProjectilesMisAJour,univers);
 
-          //va parcourir les canons pour verifier s'ils peuvent lancer de nouveau projectile
-          ArrayList<Projectile> projectilesAAjouter = traverserObjetCanon(valeurCanonConverti);
-          lesProjectilesMisAJour = ajoutDesProjectiles(projectilesAAjouter,lesProjectilesMisAJour);
-          ArrayList<Vecteur> vecteursAMettreEnRapport = creationDesVecteurs(lesProjectilesMisAJour, univers);
+              rapportpourUnTic = creationDesVecteurs(lesProjectilesMisAJour);
+              rapportDesVecteurs.add(rapportpourUnTic);
 
 
-          for (Projectile lesPro : lesProjectilesMisAJour){
-              System.out.println(lesPro);
+
+
+
+              compteurChargement++;
+          }
+          int j = 0;
+          for(int i = 1; i < rapportDesVecteurs.size(); i++){
+                  System.out.println(i+" tic\n");
+                  System.out.println(rapportDesVecteurs.get(j)+"\n"+"----------------");
+                  j++;
 
           }
+
 
 
 
@@ -155,7 +170,7 @@ public class Simulation {
                vitesseY = Double.parseDouble(tempTableau[3]);;
                tempsChargement = Integer.parseInt(tempTableau[4]);
                viePorjectile = Integer.parseInt(tempTableau[5]);
-               unCanon = new Canon(pointX,pointY,vitesseX,vitesseY,tempsChargement,tempsChargement,viePorjectile);
+               unCanon = new Canon(pointX,pointY,vitesseX,vitesseY,tempsChargement,viePorjectile);
            }catch (NumberFormatException erreurFormatValeur){
                System.err.println(ERR_VALEUR_CANON);
                System.exit(-1);
@@ -223,11 +238,11 @@ public class Simulation {
      * @return un ArrayList qui contient des objets projectiles a etre ajouter
      */
 
-    public static ArrayList<Projectile> traverserObjetCanon(ArrayList<Canon> listeDeCanon){
+    public static ArrayList<Projectile> traverserObjetCanon(ArrayList<Canon> listeDeCanon, int compteurChargement){
             ArrayList<Projectile> listeProjectile = new ArrayList<>();
             for (int i = 0; i < listeDeCanon.size(); i++){
-                Projectile tempProjectile = Canon.manipulationCanon(listeDeCanon.get(i));
-                if (!(tempProjectile.equals(null))){
+                Projectile tempProjectile = Canon.manipulationCanon(listeDeCanon.get(i), compteurChargement);
+                if (!(tempProjectile == null)){
                     listeProjectile.add(tempProjectile);
                 }
             }
@@ -255,19 +270,59 @@ public class Simulation {
         return lesProjectilesMisAJour;
     }
     //faire une methode qui envoie les projectiles un par un, ce faire bouger (additionner la position par la vitesse)
-    public static ArrayList<Vecteur> creationDesVecteurs(ArrayList<Projectile> projectileAMettreEnVecteur,
-                                                         Univers univers){
+    public static ArrayList<Vecteur> creationDesVecteurs(ArrayList<Projectile> projectileAMettreEnVecteur){
         ArrayList<Vecteur> vecteursCree = new ArrayList<>();
-        Projectile temporaireProjectile = null;
+        Vecteur aMettreDansRapport = new Vecteur();
+
         for (int i = 0; i < projectileAMettreEnVecteur.size(); i++){
-            temporaireProjectile = Vecteur.additionParVitesse(projectileAMettreEnVecteur.get(i), univers);
-            Vecteur nouvVecteur = new Vecteur(temporaireProjectile.getPointX(), temporaireProjectile.getPointY());
-            vecteursCree.add(nouvVecteur);
-
-
+            Projectile temporaire = projectileAMettreEnVecteur.get(i);
+            aMettreDansRapport = new Vecteur(temporaire.getPointX(), temporaire.getPointY());
+            vecteursCree.add(aMettreDansRapport);
         }
 
+        return vecteursCree;
     }
+
+    /**
+     * Cette methode va modifier la position de chaque projectile
+     *
+     * Cette methode s'assure aussi de gérer la vie de chaque projectile.
+     * Donc s'assurer que le projectile en question a encore de la vie.
+     * Sinon la méthode s'assure d'enlever le projectile de la méthode.
+     *
+     *
+     * @param  projectileABouger  est un ArrayList qui contient les projectiles a changé
+     * @param univers   est un objet Uinvers qui contient des valeurs pour la formule de changement de position
+     * @return un ArrayList qui contient des objets projectiles avec des projectiles avec leur position modifier
+     */
+    public static ArrayList<Projectile> bougerLesProjectiles(ArrayList<Projectile> projectileABouger, Univers univers){
+        for (int i = 0; i < projectileABouger.size(); i++){
+            Projectile temporaire = projectileABouger.get(i);
+            int vieProjectile = temporaire.getVieProjectile();
+
+            if (vieProjectile > 0){
+                temporaire = Vecteur.additionParVitesse(projectileABouger.get(i), univers);
+                projectileABouger.set(i, temporaire);
+                projectileABouger.get(i).setVieProjectile(vieProjectile - 1);
+            }else {
+                projectileABouger.remove(i);
+            }
+        }
+        return projectileABouger;
+    }
+
+    public static ArrayList<Projectile> modificationDeLaVitesseDesProjectiles(ArrayList<Projectile>
+                                                                                      projectilesVitessAModifier,
+                                                                                      Univers univers){
+        for (int i = 0; i < projectilesVitessAModifier.size(); i++){
+            Projectile temporaire = Vecteur.additionVitesseGravite(projectilesVitessAModifier.get(i), univers);
+            //remplace le projectile du ArrayList à la position i par le projectile modifier
+            projectilesVitessAModifier.set(i, temporaire);
+
+        }
+        return projectilesVitessAModifier;
+    }
+
 
 
 }

@@ -20,9 +20,15 @@ public  class Vecteur {
         return pointY;
     }
 
-   /** public static ArrayList<Projectile> calculeMouvementProjectile(ArrayList<Projectile> projectilesABouger){
-
-    } **/
+    /**
+     * Cette methode va changer la position d'un projectile
+     *
+     *
+     *
+     * @param  projectileACalculerPosition  est un projectile qui va etre modifier
+     * @param  univers est un objet Univers a utilisé pour avoir accès au valeur de temps.
+     * @return un Projectile non null avec ca position modifier.
+     */
 
     public static Projectile additionParVitesse(Projectile projectileACalculerPosition,Univers univers){
         double pointX = projectileACalculerPosition.getPointX();
@@ -41,6 +47,15 @@ public  class Vecteur {
 
     }
 
+    /**
+     * Cette methode va changer la valeur de la vitesse d'un projectile
+     *
+     *
+     *
+     * @param  projectileAvecVitesse  est un projectile qui va etre modifier
+     * @param  universAvecGravite est un objet Univers a utilisé pour avoir accès au valeur de gravité.
+     * @return un Projectile non null avec ca position modifier.
+     */
     public static Projectile additionVitesseGravite(Projectile projectileAvecVitesse,
                                                         Univers universAvecGravite){
         double vitesseX = projectileAvecVitesse.getVitesseX();

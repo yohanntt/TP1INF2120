@@ -3,29 +3,36 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Scanner;
+
+/**
+ * Cette classe effectue la simualation complète d'un Univers
+ *
+ * @author Yohann Thoby-Timothée - Code permanent : THOY22099901
+ * @author Mialy Anderson Rakotondradano - Code permanent : RAKM80300506
+ * @version 1.0
+ */
 public class Simulation {
     public static final String  ERREUR_FICHIER = "Erreur dans la lecture du fichier";
     public static final String FICHIER_INTROUVABLE = "Le fichier n'a pas été trouvé";
     public static final String ERREUR_FORMAT_FICHIER = "Erreur dans le format du fichier";
     public static final String ERR_VALEUR_CANON = "Erreur dans le type de donné des valeurs de canon";
     public static final String ERR_VALEUR_UNI = "Erreur dans le type de donné des valeurs de l'univers";
-    public static void main(String[] args) {
-        simuler("univers.txt");
-    }
+
 
     public static ArrayList<ArrayList<Vecteur>>  simuler(String cheminFichier){
         ArrayList<String> listeContenuFichier = null;
         ArrayList<Double> valeursUnivers = new ArrayList<>();
         ArrayList<Projectile> listeProjectileOfficiel = new ArrayList<>();
         ArrayList<Vecteur> rapportpourUnTic = null;
-        double gravite;
-        int nombreTicASimuler;
-        double durerUnTic;
-        int compteurChargement = 0;
+        double gravite = 0.0;
+        int nombreTicASimuler = 0;
+        double durerUnTic = 0 ;
+        int compteurChargement = 1;
 
 
-        try {
-             listeContenuFichier = lectureFichier(cheminFichier);
+
+       /** try {
+            listeContenuFichier = lectureFichier(cheminFichier);
         }catch (FileNotFoundException fichierNonTrouver){
             System.err.println(FICHIER_INTROUVABLE);
             System.exit(-1);
@@ -34,49 +41,101 @@ public class Simulation {
             System.err.println(ERREUR_FICHIER);
             System.exit(-1);
         }
-
         valeursUnivers = affectationValeurUniversDouble(listeContenuFichier);
+        //validation de l'accélération de la gravité
+        String [] tabGravite = listeContenuFichier.get(0).split(" ");
+        if (tabGravite.length == 2) {
+            gravite = Double.parseDouble(tabGravite[1]);
+        } else {
+            gravite = Double.parseDouble(tabGravite[0]);
+        }
+
+//validation de la durée d'un tic
+        try{
+            durerUnTic = valeursUnivers.get(1);
+            if (durerUnTic < 0) {
+                System.err.println(ERR_VALEUR_UNI);
+                System.exit(-1);
+            }
+        } catch (NumberFormatException erreurNombre) {
+            System.err.println(ERR_VALEUR_UNI);
+            System.exit(-1);
+        }
         //aucune validation effectuée
+        try{
+            nombreTicASimuler = affectationDurerTicUnivers(listeContenuFichier);
+            if (nombreTicASimuler < 0) {
+                System.err.println(ERR_VALEUR_UNI);
+                System.exit(-1);
+            }
+        } catch (NumberFormatException erreurNombre) {
+            System.err.println(ERR_VALEUR_UNI);
+            System.exit(-1);
+        } **/
+
+        try {
+            listeContenuFichier = lectureFichier(cheminFichier);
+        }catch (FileNotFoundException fichierNonTrouver){
+            System.err.println(FICHIER_INTROUVABLE);
+            System.exit(-1);
+
+        }catch (IOException erreurLecture){
+            System.err.println(ERREUR_FICHIER);
+            System.exit(-1);
+        }
+        valeursUnivers = affectationValeurUniversDouble(listeContenuFichier);
+        //validation de l'accélération de la gravité
+        String [] tabGravite = listeContenuFichier.get(0).split(" ");
         gravite = valeursUnivers.get(0);
+
+//validation de la durée d'un tic
+        try{
+            durerUnTic = valeursUnivers.get(1);
+            if (durerUnTic < 0) {
+                System.err.println(ERR_VALEUR_UNI);
+                System.exit(-1);
+            }
+        } catch (NumberFormatException erreurNombre) {
+            System.err.println(ERR_VALEUR_UNI);
+            System.exit(-1);
+        }
         //aucune validation effectuée
-        durerUnTic = valeursUnivers.get(1);
-        //aucune validation effectuée
-        nombreTicASimuler = affectationDurerTicUnivers(listeContenuFichier);
+        try{
+            nombreTicASimuler = affectationDurerTicUnivers(listeContenuFichier);
+            if (nombreTicASimuler < 0) {
+                System.err.println(ERR_VALEUR_UNI);
+                System.exit(-1);
+            }
+        } catch (NumberFormatException erreurNombre) {
+            System.err.println(ERR_VALEUR_UNI);
+            System.exit(-1);
+        }
+
+
+        ArrayList<String[]> canonValider = validationDesCanon(listeContenuFichier);
+        //creation de tous les canons du fichier d'entrer converti en double/int
+        ArrayList<Canon> valeurCanonConverti = constructionCanon(canonValider);
         Univers univers = new Univers(gravite,durerUnTic,nombreTicASimuler);
         ArrayList<Projectile> lesProjectilesMisAJour = new ArrayList<>();
         ArrayList<ArrayList<Vecteur>> rapportDesVecteurs = new ArrayList<>();
 
 
+        while (compteurChargement <= univers.getNombreDeTicSimuler()){
+            //va parcourir les canons pour verifier s'ils peuvent lancer de nouveau projectile
+            ArrayList<Projectile> projectilesAAjouter = traverserObjetCanon(valeurCanonConverti, compteurChargement);
+            lesProjectilesMisAJour = ajoutDesProjectiles(projectilesAAjouter,lesProjectilesMisAJour);
+            lesProjectilesMisAJour = bougerLesProjectiles(lesProjectilesMisAJour, univers);
+            lesProjectilesMisAJour = modificationDeLaVitesseDesProjectiles(lesProjectilesMisAJour,univers);
 
-       ArrayList<String[]> canonValider = validationDesCanon(listeContenuFichier);
-        //creation de tous les canons du fichier d'entrer converti en double/int
-       ArrayList<Canon> valeurCanonConverti = constructionCanon(canonValider);
-          while (compteurChargement <= univers.getNombreDeTicSimuler()){
-              //va parcourir les canons pour verifier s'ils peuvent lancer de nouveau projectile
-              ArrayList<Projectile> projectilesAAjouter = traverserObjetCanon(valeurCanonConverti, compteurChargement);
-              lesProjectilesMisAJour = ajoutDesProjectiles(projectilesAAjouter,lesProjectilesMisAJour);
-              lesProjectilesMisAJour = bougerLesProjectiles(lesProjectilesMisAJour, univers);
-              lesProjectilesMisAJour = modificationDeLaVitesseDesProjectiles(lesProjectilesMisAJour,univers);
-
-              rapportpourUnTic = creationDesVecteurs(lesProjectilesMisAJour);
-              rapportDesVecteurs.add(rapportpourUnTic);
+            rapportpourUnTic = creationDesVecteurs(lesProjectilesMisAJour);
+            rapportDesVecteurs.add(rapportpourUnTic);
 
 
 
 
 
-              compteurChargement++;
-          }
-          int j = 0;
-          for(int i = 1; i < rapportDesVecteurs.size(); i++){
-                  System.out.println(i+" tic\n");
-                  System.out.println(rapportDesVecteurs.get(j)+"\n"+"----------------");
-                  j++;
-
-          }
-
-
-
+            compteurChargement++;
+        }
 
 
 
@@ -163,23 +222,45 @@ public class Simulation {
         int tempsChargement = 0;
         for (int i = 0; i < valeursChaqueCanons.size(); i++){
             String[] tempTableau = valeursChaqueCanons.get(i);
-           try{
-               pointX = Double.parseDouble(tempTableau[0]);
-               pointY = Double.parseDouble(tempTableau[1]);;
-               vitesseX = Double.parseDouble(tempTableau[2]); ;
-               vitesseY = Double.parseDouble(tempTableau[3]);;
-               tempsChargement = Integer.parseInt(tempTableau[4]);
-               viePorjectile = Integer.parseInt(tempTableau[5]);
-               unCanon = new Canon(pointX,pointY,vitesseX,vitesseY,tempsChargement,viePorjectile);
-           }catch (NumberFormatException erreurFormatValeur){
-               System.err.println(ERR_VALEUR_CANON);
-               System.exit(-1);
-           }
+            try {
+                pointX = Double.parseDouble(tempTableau[0]);
+                pointY = Double.parseDouble(tempTableau[1]);
+                vitesseX = Double.parseDouble(tempTableau[2]);
+                vitesseY = Double.parseDouble(tempTableau[3]);
+            } catch (NumberFormatException erreurNombre) {
+                System.err.println(ERR_VALEUR_CANON);
+                System.exit(-1);
+            }
+
+            try {
+                tempsChargement = Integer.parseInt(tempTableau[4]);
+                if (tempsChargement < 0) {
+                    System.err.println(ERR_VALEUR_CANON);
+                    System.exit(-1);
+                }
+            } catch (NumberFormatException erreurNombre) {
+                System.err.println(ERR_VALEUR_CANON);
+                System.exit(-1);
+            }
+            try {
+                viePorjectile = Integer.parseInt(tempTableau[5]);
+                if (viePorjectile < 0) {
+                    System.err.println(ERR_VALEUR_CANON);
+                    System.exit(-1);
+                }
+            } catch (NumberFormatException erreurNombre) {
+                System.err.println(ERR_VALEUR_CANON);
+                System.exit(-1);
+            }
+            unCanon = new Canon(pointX,pointY,vitesseX,vitesseY,tempsChargement,viePorjectile);
 
             chaqueCanon.add(unCanon);
         }
-    return chaqueCanon;
-}
+        return chaqueCanon;
+    }
+
+    /**
+     * Cette methode affecte les valeurs de l'univers
 
     /**
      * Cette methode affecte les valeurs de l'univers
@@ -306,11 +387,21 @@ public class Simulation {
                 projectileABouger.get(i).setVieProjectile(vieProjectile - 1);
             }else {
                 projectileABouger.remove(i);
+                i--;
             }
         }
         return projectileABouger;
     }
 
+    /**
+     * Cette methode va modifier le vecteur de vitesse
+     *
+     *Le vecteur de vitesse est modifié en additionant la vitesse(X,Y) avec la gravité
+     *
+     * @param  projectilesVitessAModifier  est un ArrayList qui contient les vecteurs de vitesse a changé
+     * @param univers   est un objet Uinvers qui contient des valeurs pour la formule de changement de vitesse
+     * @return un ArrayList qui contient des objets projectiles avec des projectiles avec leur position modifier
+     */
     public static ArrayList<Projectile> modificationDeLaVitesseDesProjectiles(ArrayList<Projectile>
                                                                                       projectilesVitessAModifier,
                                                                                       Univers univers){

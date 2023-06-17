@@ -9,7 +9,7 @@ public class Canon  {
     private double vitesseY;
     private int vieProjectile;
     private int tempsDeChargement;
-    private int tempsChargeInitial;
+
 
     public Canon(){
 
@@ -80,10 +80,19 @@ public class Canon  {
         return vieProjectile;
     }
 
+    /**
+     * Cette methode va vérifier le temps de chargement du canon et
+     * lancer un nouveau projectile au moment approrié
+     *
+     *
+     *
+     * @param  unCanon  est un canon qui va etre vérifier
+     * @param  compteurChargement est une valeur a comparer avec le temps de chargement
+     * @return un Projectile non null, si le canon est chargé, autrement il renvoie un canon null.
+     */
     public static Projectile manipulationCanon(Canon unCanon, int compteurChargement){
         //c'est là que je vais gérer les conditions des canons
         //comme verifier le temps de chargement, lancer de nouveau projectile etc...
-        int compteur = 1;
         Projectile nouvProjectile = null;
         double pointX = unCanon.getPointX();
         double pointY = unCanon.getPointY();
@@ -123,7 +132,7 @@ public class Canon  {
                 ", vitesseY=" + vitesseY +
                 ", vieProjectile=" + vieProjectile +
                 ", tempsDeChargement=" + tempsDeChargement +
-                ", tempsChargeInitial=" + tempsChargeInitial +
+                ", tempsChargeInitial=" + 
                 "} " ;
     }
 }

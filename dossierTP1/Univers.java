@@ -1,3 +1,10 @@
+/**
+ *
+ * It stores information such as name, age, and address.
+ *
+ * @author Your Name
+ * @version 1.0
+ */
 public class Univers {
     private double gravite;
     private double durerUnTic;
